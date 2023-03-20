@@ -1,5 +1,7 @@
 # GraphiQL ChatGPT plugin
 
+[![npm](https://img.shields.io/npm/v/graphiql-plugin-chatgpt)](https://www.npmjs.com/package/graphiql-plugin-chatgpt)
+
 A GraphiQL plugin to get a generated query based on the current query via ChatGPT API.
 
 ![Screenshot](./image.jpg)
