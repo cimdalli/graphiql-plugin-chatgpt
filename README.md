@@ -4,7 +4,7 @@
 
 A GraphiQL plugin to get a generated query based on the current query via ChatGPT API.
 
-![Screenshot](./image.jpg)
+![Screenshot](https://raw.githubusercontent.com/cimdalli/graphiql-plugin-chatgpt/main/screenshot.gif)
 
 ## Install
 
