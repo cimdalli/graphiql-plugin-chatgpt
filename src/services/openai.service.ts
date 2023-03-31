@@ -1,4 +1,5 @@
 type OpenAIRequest = {
+  model: string
   prompt: string
   temperature?: number
   max_tokens?: number
@@ -45,8 +46,8 @@ export class OpenAIService {
         : new DefaultOpenAIProvider(config)
   }
 
-  public async createCompletion(model: string, req: OpenAIRequest) {
-    const response = await this.provider.sendRequest(`${model}/completions`, req)
+  public async createCompletion(req: OpenAIRequest) {
+    const response = await this.provider.sendRequest("completions", req)
     const { data, status } = response
 
     if (status !== 200) {
@@ -94,7 +95,7 @@ class DefaultOpenAIProvider extends OpenAIProvider {
   }
 
   async sendRequest(path: string, req: OpenAIRequest) {
-    return super.sendRequest(`v1/engines/${path}`, req)
+    return super.sendRequest(`v1/${path}`, req)
   }
 }
 

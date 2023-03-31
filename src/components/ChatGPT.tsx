@@ -21,7 +21,6 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
   const [result, setResult] = useState(initialResult)
   const [status, setStatus] = useState("")
   const [queryDesc, setQueryDesc] = useState("")
-  const [queryReq, setQueryReq] = useState("")
   const [isSuggestValid, setIsSuggestValid] = useState(false)
   const [isResultValid, setIsResultValid] = useState(false)
 
@@ -32,14 +31,13 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
   useEffect(() => {
     let status = ""
 
-    if (!queryReq) status = "Missing desired action"
     if (!queryDesc) status = "Missing query description"
     if (!query) status = "Missing query"
     if (!userId) status = "Missing userId"
 
     setIsSuggestValid(!status)
     setStatus(status || "Ready..")
-  }, [userId, query, queryDesc, queryReq])
+  }, [userId, query, queryDesc])
 
   useEffect(() => {
     setIsResultValid(!!result)
@@ -47,10 +45,10 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
 
   const getPrompt = () => {
     return [
-      `### Here is an example prompt to generate a graphQL query: ${queryDesc}`,
+      `### Generate graphql query based on following`,
       "#",
       ...query.split("\n").map((line, i) => (!i ? "##" : "") + `# ${line}`),
-      "### " + queryReq,
+      "### " + queryDesc,
       primePrompt,
     ].join("\n")
   }
@@ -60,7 +58,8 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
     setStatus("Getting suggestion..")
 
     const result = await openAIService
-      .createCompletion("code-davinci-002", {
+      .createCompletion({
+        model: "text-davinci-003",
         user: userId,
         prompt: getPrompt(),
         temperature: 0,
@@ -79,8 +78,6 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
 
   const selectSuggestion = () => {
     onEdit(result)
-    setQueryDesc(queryReq)
-    setQueryReq("")
     setResult("")
   }
 
@@ -90,11 +87,8 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
     <div className="graphiql-plugin-chatgpt">
       <h1>ChatGPT</h1>
 
-      <h4>What does the query do?</h4>
+      <h4>Describe a query to generate:</h4>
       <textarea value={queryDesc} onChange={(e) => setQueryDesc(e.target.value)} />
-
-      <h4>What do you want to do?</h4>
-      <textarea value={queryReq} onChange={(e) => setQueryReq(e.target.value)} />
 
       <div style={{ marginTop: 10 }}>
         <Button type="button" onClick={runQueryGeneration} disabled={!isSuggestValid}>
