@@ -24,7 +24,7 @@ type OpenAIResponse = {
   status: number
 }
 
-type BaseOpenAIProviderConfig = { apiKey: string }
+type BaseOpenAIProviderConfig = { apiKey: string; headers?: Record<string, string> }
 
 type DefaultOpenAIProviderConfig = BaseOpenAIProviderConfig & {
   provider: "openai"
@@ -72,6 +72,7 @@ abstract class OpenAIProvider<T extends BaseOpenAIProviderConfig = BaseOpenAIPro
       headers: {
         "Content-Type": "application/json",
         ...this.getAuthHeader(),
+        ...this.config.headers,
       },
       body: JSON.stringify(req),
     }
