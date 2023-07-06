@@ -1,6 +1,6 @@
 {
   "name": "graphiql-plugin-chatgpt",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Graphiql ChatGPT plugin",
   "license": "MIT",
   "repository": {
