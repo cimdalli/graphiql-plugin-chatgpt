@@ -1,5 +1,5 @@
 import { GraphiQLPlugin, Button } from "@graphiql/react"
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useMemo, useRef, useState } from "react"
 
 import { OpenAIProviderConfig, OpenAIService } from "../services/openai.service"
 
@@ -24,9 +24,23 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
   const [isSuggestValid, setIsSuggestValid] = useState(false)
   const [isResultValid, setIsResultValid] = useState(false)
 
-  if (!userId) {
-    console.error("Missing user value: use with auth key..")
-  }
+  const prompt = useMemo(() => {
+    return [
+      `### Generate graphql query based on following`,
+      "#",
+      ...query.split("\n").map((line, i) => (!i ? "##" : "") + `# ${line}`),
+      "### " + queryDesc,
+      primePrompt,
+    ].join("\n")
+  }, [query, queryDesc])
+
+  useEffect(() => {
+    if (!userId) console.error("Missing user value: use with auth key..")
+  }, [])
+
+  useEffect(() => {
+    console.log(prompt)
+  }, [prompt])
 
   useEffect(() => {
     let status = ""
@@ -43,16 +57,6 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
     setIsResultValid(!!result)
   }, [result])
 
-  const getPrompt = () => {
-    return [
-      `### Generate graphql query based on following`,
-      "#",
-      ...query.split("\n").map((line, i) => (!i ? "##" : "") + `# ${line}`),
-      "### " + queryDesc,
-      primePrompt,
-    ].join("\n")
-  }
-
   const runQueryGeneration = async () => {
     setResult("")
     setStatus("Getting suggestion..")
@@ -61,7 +65,7 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
       .createCompletion({
         model: "text-davinci-003",
         user: userId,
-        prompt: getPrompt(),
+        prompt: prompt,
         temperature: 0,
         max_tokens: 250,
         top_p: 1,
@@ -81,14 +85,22 @@ function ChatGPTPlugin({ config, userId, query, onEdit }: ChatGPTPluginProps) {
     setResult("")
   }
 
-  console.log(getPrompt())
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isSuggestValid && (e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      runQueryGeneration()
+    }
+  }
 
   return (
     <div className="graphiql-plugin-chatgpt">
       <h1>ChatGPT</h1>
 
       <h4>Describe a query to generate:</h4>
-      <textarea value={queryDesc} onChange={(e) => setQueryDesc(e.target.value)} />
+      <textarea
+        value={queryDesc}
+        onChange={(e) => setQueryDesc(e.target.value)}
+        onKeyDown={handleKeyDown}
+      />
 
       <div style={{ marginTop: 10 }}>
         <Button type="button" onClick={runQueryGeneration} disabled={!isSuggestValid}>
