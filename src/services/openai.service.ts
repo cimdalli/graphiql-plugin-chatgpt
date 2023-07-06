@@ -33,6 +33,7 @@ type DefaultOpenAIProviderConfig = BaseOpenAIProviderConfig & {
 type AzureOpenAIProviderConfig = BaseOpenAIProviderConfig & {
   provider: "azure"
   endpoint: string
+  deploymentId: string
   apiVersion: string
 }
 export type OpenAIProviderConfig = DefaultOpenAIProviderConfig | AzureOpenAIProviderConfig
@@ -110,6 +111,9 @@ class AzureOpenAIProvider extends OpenAIProvider<AzureOpenAIProviderConfig> {
   }
 
   async sendRequest(path: string, req: OpenAIRequest) {
-    return super.sendRequest(`openai/deployment/${path}?api-version=${this.config.apiVersion}`, req)
+    return super.sendRequest(
+      `openai/deployments/${this.config.deploymentId}/${path}?api-version=${this.config.apiVersion}`,
+      req
+    )
   }
 }
